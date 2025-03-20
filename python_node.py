@@ -35,7 +35,11 @@ class PythonFunctionNode(Node):
         self.function_body = ""  # The Python code for the function body
         self.function_name = f"function_{self._code}"  # Default function name
         
+        # Initialize first, then create components
         super().__init__()
+        
+        # Ensure entries are properly built
+        self.update_entries()
     
     def create(self):
         """Initialize the node with default settings"""
@@ -113,7 +117,7 @@ class PythonFunctionNode(Node):
             self.remove_input(last_input)
             
             # Force update of the node layout
-            self.update_entries()
+        self.update_entries()
     
     def on_rename_output(self):
         """Rename the output of the node"""
@@ -224,8 +228,11 @@ class CodeEntry(Entry):
     text_changed = pyqtSignal(str)
     
     def __init__(self, initial_text=""):
-        super().__init__()
+        # Entry requires a name parameter
+        super().__init__(name="code_editor")
         self.text = initial_text
+        # Pre-create widget to avoid None issues during node creation
+        self._widget = self.create_widget()
         
     def calculate_value(self):
         return self.text
@@ -265,6 +272,10 @@ class CodeEntry(Entry):
         self.text = text
         if hasattr(self, 'editor'):
             self.editor.setText(text)
+            
+    def get_widget(self):
+        """Override to ensure widget is always available"""
+        return self._widget
 
 
 class InputButtonsEntry(Entry):
@@ -272,6 +283,10 @@ class InputButtonsEntry(Entry):
     add_clicked = pyqtSignal()
     remove_clicked = pyqtSignal()
     rename_clicked = pyqtSignal()
+    
+    def __init__(self):
+        # Entry requires a name parameter
+        super().__init__(name="input_buttons")
     
     def calculate_value(self):
         return None
